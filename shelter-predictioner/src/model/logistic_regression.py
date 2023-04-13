@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.model_selection import TimeSeriesSplit
 
 
 def train():
@@ -57,7 +58,10 @@ def train():
     y = data['alarm_occurred']
 
     # Split data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    tscv = TimeSeriesSplit(n_splits=5)
+    for train_index, test_index in tscv.split(X):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = y.iloc[train_index], y.iloc[test_index]
 
     # 3. Train the Logistic Regression model
     pipe = Pipeline([
@@ -89,6 +93,3 @@ def train():
     print("False Positives:", fp)
     print("False Negatives:", fn)
     print("True Positives:", tp)
-
-    final_weights = pipe.named_steps['classifier'].coef_
-    print("Final weights:", final_weights)
