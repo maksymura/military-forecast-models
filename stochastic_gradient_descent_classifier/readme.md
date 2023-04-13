@@ -2,6 +2,7 @@
 2. Link to colab: https://colab.research.google.com/drive/1jjIW7e3aYZ-0ZBwst00C_-aTT0IyPh4W?usp=sharing
 3. Confusion Matrix:
    ![img.png](confusion_matrix.png)
+
    True Positive: 0
    True Negative: 38521
    False Positive: 0
