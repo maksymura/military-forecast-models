@@ -8,6 +8,7 @@ import boto3
 import pandas as pd
 import pickle
 import datetime
+import json
 
 s3 = boto3.client('s3')
 
@@ -32,9 +33,15 @@ def predict(event, ctx):
 
     prediction = model.predict(prediction_df)
 
-    return {
-        'prediction': prediction[0]
+    response = {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps({"prediction": prediction.tolist()})
     }
+
+    return response
 
 
 def get_weather():
