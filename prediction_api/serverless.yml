@@ -1,0 +1,37 @@
+service: predict
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: eu-central-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: s3:ListBucket
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+          Resource:
+            - arn:aws:s3:::${ssm:main-bucket}/*
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    zip: true
+    dockerizePip: non-linux
+
+package:
+  individually: false
+  exclude:
+    - '**/*'
+  include:
+    - handler.py
+
+functions:
+  predict:
+    handler: handler.predict

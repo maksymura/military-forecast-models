@@ -1,0 +1,4 @@
+.serverless
+myenv
+node_modules
+.requirements.zip
