@@ -16,7 +16,9 @@ weather_key = 'weather_v3/2022-02-24.json'
 model_key = "model/knn.pickle"
 
 
-# TODO: Update get_prediction_df to work with real weather data from get_weather and bayes model
+# TODO:
+#  1. Update get_prediction_df to work with real weather data from get_weather and bayes model
+#  2. Save prediction to S3
 
 def predict(event, ctx):
     current_datetime = datetime.datetime.now()

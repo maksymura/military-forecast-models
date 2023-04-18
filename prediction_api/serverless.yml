@@ -1,4 +1,4 @@
-service: predict
+service: mf-prediction-api
 
 provider:
   name: aws
@@ -35,3 +35,9 @@ package:
 functions:
   predict:
     handler: handler.predict
+    timeout: 10
+    events:
+      - schedule: rate(24 hours)
+      - http:
+          path: /predict
+          method: post
