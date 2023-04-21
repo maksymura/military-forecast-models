@@ -1,10 +1,5 @@
 from datetime import datetime, timedelta
 import json
-from collections import OrderedDict
-import json
-import re
-
-file_path = "resources/merged/tfidf.json"
 
 
 def tf_idf_vector(data):
@@ -27,6 +22,7 @@ def is_ukr_holiday(day_of_year):
     date_obj = datetime(year=datetime.now().year, month=1, day=1) + timedelta(days=day_of_year - 1)
     return date_obj.strftime('%d-%m') in holidays_data['ukr'].keys()
 
+
 def is_rus_holiday(day_of_year):
     with open("resources/holidays.json", 'r') as f:
         holidays_data = json.load(f)
@@ -38,9 +34,11 @@ def get_day_of_week(date_str):
     dt = datetime.strptime(date_str, "%Y-%m-%d")
     return dt.weekday()
 
+
 def get_day_of_year(date_str):
     dt = datetime.strptime(date_str, "%Y-%m-%d")
     return dt.timetuple().tm_yday
+
 
 def get_month(date_str):
     dt = datetime.strptime(date_str, "%Y-%m-%d")
@@ -107,6 +105,7 @@ def format_date(date_string: str) -> str:
     formatted_date_string = f"{date_object.year}-{date_object.month}-{date_object.day}"
 
     return formatted_date_string
+
 
 def number_to_hour_format(hour):
     return f"{hour:02d}:00"

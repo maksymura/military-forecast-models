@@ -5,11 +5,9 @@ try:
 except ImportError:
     pass
 
-from sklearn.preprocessing import LabelEncoder
 import boto3
 import pandas as pd
 import pickle
-import json
 import io
 from utils import *
 
@@ -17,7 +15,7 @@ bucket_name = 'military-forecast'
 weather_folder = 'weather_v3'
 tfidf_folder = 'isw/tfidf'
 predictions_folder = 'predictions'
-model_key = "model/naive_bayes.pkl"
+model_key = "model/naive_bayes_v1.pkl"
 
 s3 = boto3.client(
     's3',
