@@ -1,23 +1,17 @@
-import pickle
-import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
-from sklearn.inspection import permutation_importance
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
-from utils import get_region_number
 from sklearn.model_selection import StratifiedShuffleSplit
+from utils import get_region_number
 
 
-def train():
-    # 1. Load the data
-    data = pd.read_csv("resources/dataset/final_data.csv", parse_dates=['date', 'alarm_start', 'alarm_end', 'time'])
-
-    # 2. Preprocess the data
+def train(data):
+    # Preprocess the data
     # Create a binary label for whether an alarm occurred
     data['vector'] = data['vector'].apply(
         lambda x: np.array([float(i) for i in x.strip('[]').split(',')], dtype=np.float32) if isinstance(x, str) else x)
@@ -35,6 +29,7 @@ def train():
     # Extract features from the date
     data['day_of_week'] = data['date'].dt.dayofweek
     data['day_of_year'] = data['date'].dt.dayofyear
+    data['hour'] = data['time'].dt.hour
     data['month'] = data['date'].dt.month
 
     # Extract features and target
@@ -45,9 +40,10 @@ def train():
     y = data['alarm_occurred']
 
     # Split data into training and testing sets using TimeSeriesSplit
-    tscv = StratifiedShuffleSplit(n_splits=10)
+    tscv = StratifiedShuffleSplit(n_splits=2)
 
     best_accuracy = 0
+    best_clf = 0
 
     for j, (train_index, test_index) in enumerate(tscv.split(X, y)):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
@@ -70,39 +66,11 @@ def train():
         clf = GridSearchCV(pipe, param_grid, cv=5, scoring='accuracy', n_jobs=-1)
         clf.fit(X_train, y_train)
 
-        result = permutation_importance(clf.best_estimator_, X_train, y_train, n_repeats=10, random_state=42)
-
-        # Print feature importances
-        for i, (importance, feature) in enumerate(zip(result.importances_mean, features)):
-            print(f"Feature {i}: {feature} - Importance: {importance}")
-
-        # Print the best hyperparameters and their corresponding accuracy
-        print("Best hyperparameters:", clf.best_params_)
-        print("accuracy:", clf.best_score_)
-
-        # Check accuracy on the test set using the best model
         y_pred = clf.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        print("Test set accuracy:", accuracy_score(y_test, y_pred))
-        print("Test classification_report:\n", classification_report(y_pred, y_test))
-        c_matrix = confusion_matrix(y_test, y_pred)
-        print("Test confusion_matrix:\n", c_matrix)
-
-        tn, fp, fn, tp = c_matrix.ravel()
-
-        print("Confusion matrix:")
-        print("True Negatives:", tn)
-        print("False Positives:", fp)
-        print("False Negatives:", fn)
-        print("True Positives:", tp)
-
-        print(j)
 
         if accuracy > best_accuracy:
             best_accuracy = accuracy
-            filename = 'naive_bayes_v2.pkl'
-            with open(filename, 'wb') as f:
-                pickle.dump(clf, f)
+            best_clf = clf
 
-
-train()
+    return best_clf
