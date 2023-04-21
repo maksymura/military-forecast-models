@@ -35,10 +35,11 @@ def train():
     # Extract features from the date
     data['day_of_week'] = data['date'].dt.dayofweek
     data['day_of_year'] = data['date'].dt.dayofyear
+    data['hour'] = data['time'].dt.hour
     data['month'] = data['date'].dt.month
 
     # Extract features and target
-    features = ['city_encoded', 'day_of_week', 'day_of_year', "city_latitude", "city_longitude", "city_tzoffset",
+    features = ['city_encoded', 'day_of_week', 'day_of_year', "hour", "city_latitude", "city_longitude",
                 "day_feelslike", "day_snow", "day_snowdepth", "day_windgust", "day_winddir", "day_pressure",
                 "day_precipprob", "day_severerisk", 'is_rus_holiday', 'is_ukr_holiday', 'vector_mean']
     X = data[features]
