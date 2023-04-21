@@ -8,14 +8,14 @@ from utils import get_region_number
 
 data = pd.read_csv("resources/dataset/final_data.csv",
         parse_dates=['date', 'alarm_start', 'alarm_end', 'time'])
-features = ['city_encoded', 'day_of_week', 'day_of_year', 'month', "day_feelslikemin", "day_sunriseEpoch",
-            "day_sunsetEpoch", "city_latitude", "city_longitude", "city_tzoffset", "day_feelslike",
-            "day_precipprob", "day_snow", "day_snowdepth", "day_windgust", "day_winddir", "day_pressure",
-            "day_cloudcover", "day_severerisk", 'is_rus_holiday', 'is_ukr_holiday', 'vector_mean']
+# features = ['city_encoded', 'day_of_week', 'day_of_year', 'month', "day_feelslikemin", "day_sunriseEpoch",
+#             "day_sunsetEpoch", "city_latitude", "city_longitude", "city_tzoffset", "day_feelslike",
+#             "day_precipprob", "day_snow", "day_snowdepth", "day_windgust", "day_winddir", "day_pressure",
+#             "day_cloudcover", "day_severerisk", 'is_rus_holiday', 'is_ukr_holiday', 'vector_mean']
 
-# features = ['city_encoded', 'day_of_week', 'day_of_year', "city_latitude", "city_longitude", "city_tzoffset",
-#             "day_feelslike", "day_snow", "day_snowdepth", "day_windgust", "day_winddir", "day_pressure",
-#                 "day_precipprob", "day_severerisk", 'is_rus_holiday', 'is_ukr_holiday', 'vector_mean']
+features = ['city_encoded', 'day_of_week', 'day_of_year', "hour", "city_latitude", "city_longitude",
+            "day_feelslike", "day_snow", "day_snowdepth", "day_windgust", "day_winddir", "day_pressure",
+            "day_precipprob", "day_severerisk", 'is_rus_holiday', 'is_ukr_holiday', 'vector_mean']
 
 # 2. Preprocess the data
 # Create a binary label for whether an alarm occurred
@@ -35,6 +35,7 @@ data['city_encoded'] = data['city'].apply(lambda x: get_region_number(str(x)))
 # Extract features from the date
 data['day_of_week'] = data['date'].dt.dayofweek
 data['day_of_year'] = data['date'].dt.dayofyear
+data['hour'] = data['time'].dt.hour
 data['month'] = data['date'].dt.month
 
 # Compute the correlation matrix
