@@ -3,7 +3,7 @@ try:
 except ImportError:
   pass
 
-
+from sklearn.preprocessing import LabelEncoder
 import boto3
 import pandas as pd
 import pickle
@@ -13,8 +13,9 @@ import io
 
 bucket_name = 'military-forecast'
 weather_folder = 'weather_v3'
+tfidf_folder = 'isw/tfidf'
 predictions_folder = 'predictions'
-model_key = "model/knn.pickle"
+model_key = "model/bias.pickle"
 
 s3 = boto3.client('s3')
 
@@ -27,7 +28,10 @@ def predict(event, ctx):
     weather = get_weather(current_datetime_string)
     print("Fetched weather")
 
-    prediction_df = get_df_for_prediction(weather)
+    tfidf = get_tfidf(current_datetime_string)
+    print("Fetched tfidf")
+
+    prediction_df = get_df_for_prediction(weather, tfidf, current_datetime_string)
     print("Created df for prediction")
 
     model = get_model()
@@ -51,32 +55,60 @@ def predict(event, ctx):
 
 
 def get_weather(current_datetime_string):
-    # TODO: replace 2022-02-24 with current_datetime_string
-    weather_key = f"{weather_folder}/2022-02-24.json"
+    weather_key = f"{weather_folder}/{current_datetime_string}.json"
     weather_response = s3.get_object(Bucket=bucket_name, Key=weather_key)
     weather_data = weather_response['Body'].read().decode('utf-8')
 
     return weather_data
 
+def get_tfidf(current_datetime_string):
+    tfidf_key = f"{tfidf_folder_folder}/{format_date(current_datetime_string) }.json"
+    tfidf_response = s3.get_object(Bucket=bucket_name, Key=tfidf_key)
+    tfidf_data = tfidf_response['Body'].read().decode('utf-8')
+    tf_idf_vector(tfidf_data).apply(lambda x: np.mean(x) if isinstance(x, np.ndarray) else np.nan)
 
-def get_df_for_prediction(weather):
-    # TODO: use columns for bayes, use merged: current day weather and other data as model input
-    columns = ['date', 'city', 'day_feelslikemax', 'day_feelslikemin',
-               'day_feelslike', 'day_precipprob', 'day_snow',
-               'day_snowdepth', 'day_windgust', 'day_windspeed', 'day_winddir',
-               'day_pressure', 'day_cloudcover', 'day_visibility', 'day_severerisk',
-               'day_preciptype', 'is_rus_holiday', 'is_ukr_holiday']
-    values = [
-        [1651363200, 10762219, 16.5, 7.0, 12.3, 0, 0.0, 0.0, 20.5, 7.9, 30.5, 1022.0, 55.2, 24.1, 10, 4496177, True,
-         True]]
+    return tfidf_data
 
-    df = pd.DataFrame(values, columns=columns)
+
+def get_df_for_prediction(city, weather, tfidf, current_date_time):
+    le = LabelEncoder()
+
+    encoded_city_to_compare = le.fit_transform(city)
+
+    filtered_weather = [item for item in payload
+                        if encode_city_address(item['city_address']) == encoded_city_to_compare
+                        and not (encode_city_address(item['city_address']) in seen or seen.add(
+            encode_city_address(item['city_address'])))]
+
+    df = pd.Series({
+        'city_encoded': encoded_city_to_compare,
+        'day_of_week': weather[day_severerisk],
+        'day_of_year': weather[day_severerisk],
+        'month': weather[day_severerisk],
+        'day_feelslikemin': filtered_weather[day_severerisk],
+        'day_sunriseEpoch': filtered_weather[day_severerisk],
+        'day_sunsetEpoch': filtered_weather[day_severerisk],
+        'city_latitude': filtered_weather[day_severerisk],
+        'city_longitude': filtered_weather[day_severerisk],
+        'city_tzoffset': filtered_weather[day_severerisk],
+        'day_feelslike': filtered_weather[day_severerisk],
+        'day_precipprob': filtered_weather[day_severerisk],
+        'day_snow': filtered_weather[day_severerisk],
+        'day_snowdepth': filtered_weather[day_severerisk],
+        'day_windgust': filtered_weather[day_severerisk],
+        'day_winddir': filtered_weather[day_severerisk],
+        'day_pressure': filtered_weather[day_severerisk],
+        'day_cloudcover': filtered_weather[day_severerisk],
+        'day_severerisk': filtered_weather[day_severerisk],
+        'is_rus_holiday': is_rus_holiday(current_date_time),
+        'is_ukr_holiday': is_ukr_holiday(current_date_time),
+        'vector_mean': tfidf
+    }).to_frame().T
 
     return df
 
 
 def get_model():
-    # TODO: fetch bayes model
     model_response = s3.get_object(Bucket=bucket_name, Key=model_key)
     model_file = model_response['Body'].read()
     model = pickle.loads(model_file)
@@ -91,3 +123,47 @@ def upload_predictions(current_datetime_string, prediction):
     file_name = f"{predictions_folder}/{current_datetime_string}.json"
 
     s3.upload_fileobj(file, bucket_name, file_name)
+
+
+def format_date(date_string: str) -> str:
+    date_object = datetime.strptime(date_string, "%Y-%m-%d")
+    formatted_date_string = f"{date_object.year}-{date_object.month}-{date_object.day}"
+
+    return formatted_date_string
+
+def tf_idf_vector(data):
+    unique_words = set(data["tfIdf"].keys())
+    unique_words = sorted(list(unique_words))
+    word_indices = {word: idx for idx, word in enumerate(unique_words)}
+
+    vector = [0.0] * len(unique_words)
+    for word, values in data["tfIdf"].items():
+        idx = word_indices[word]
+        vector[idx] = values["tfidf"]
+
+    return vector
+
+def is_ukr_holiday(date):
+    with open("resources/holidays.json", 'r') as f:
+        holidays_data = json.load(f)
+    date_obj = datetime.strptime(date, '%Y-%m-%d')
+    return date_obj.strftime('%d-%m') in holidays_data['ukr'].keys()
+
+
+def is_rus_holiday(date):
+    with open("resources/holidays.json", 'r') as f:
+        holidays_data = json.load(f)
+    date_obj = datetime.strptime(date, '%Y-%m-%d')
+    return date_obj.strftime('%d-%m') in holidays_data['rus'].keys()
+
+def get_year(date_str):
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    return dt.year
+
+def get_month(date_str):
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    return dt.month
+
+def get_day(date_str):
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    return dt.day
