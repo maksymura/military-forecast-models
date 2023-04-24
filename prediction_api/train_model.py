@@ -51,14 +51,13 @@ def train(data):
 
         # Train the Naive Bayes model
         pipe = ImbPipeline([
-            ('sampling', SMOTE()),
+            ('sampling', SMOTE(sampling_strategy=0.2, k_neighbors=5, n_jobs=-1)),
             ('scaler', StandardScaler()),
             ('classifier', GaussianNB())
         ])
 
         # Define hyperparameters to search over
         param_grid = {
-            'sampling__k_neighbors': [3, 5, 7],
             'classifier__var_smoothing': [1e-9, 1e-8, 1e-7, 1e-6]
         }
 
