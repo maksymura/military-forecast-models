@@ -96,7 +96,6 @@ def get_region_number(city):
         return 24
     elif city == "Chernihiv":
         return 25
-    print("HERE " + city)
     return -1
 
 
@@ -109,3 +108,50 @@ def format_date(date_string: str) -> str:
 
 def number_to_hour_format(hour):
     return f"{hour:02d}:00"
+
+
+def cities_list():
+    return [
+        "Vinnytsia",
+        "Lutsk",
+        "Dnipro",
+        "Donetsk",
+        "Zhytomyr",
+        "Uzhgorod",
+        "Zaporozhye",
+        "Ivano-Frankivsk",
+        "Kyiv",
+        "Kropyvnytskyi",
+        "Lviv",
+        "Mykolaiv",
+        "Odesa",
+        "Poltava",
+        "Rivne",
+        "Sumy",
+        "Ternopil",
+        "Kharkiv",
+        "Kherson",
+        "Khmelnytskyi",
+        "Cherkasy",
+        "Chernivtsi",
+        "Chernihiv"
+    ]
+
+
+def remove_duplicates(data):
+    unique_data = []
+    seen = set()
+
+    for d in data:
+        json_d = json.dumps(d, sort_keys=True)  # Convert the dictionary to a JSON string
+
+        if json_d not in seen:
+            seen.add(json_d)
+            unique_data.append(d)
+
+    return unique_data
+
+
+def next_day(date_string):
+    date_object = datetime.strptime(date_string, "%Y-%m-%d")
+    return (date_object + timedelta(days=1)).strftime('%Y-%m-%d')
