@@ -35,6 +35,7 @@ def train():
     # Extract features from the date
     data['day_of_week'] = data['date'].dt.dayofweek
     data['day_of_year'] = data['date'].dt.dayofyear
+    data['hour'] = data['time'].dt.hour
     data['month'] = data['date'].dt.month
 
     # Extract features and target
