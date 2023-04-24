@@ -3,7 +3,10 @@ Local setup:
 2. `python3 -m venv myenv`
 3. `source myenv/bin/activate`
 4. `pip install -r requirements.txt`
-5. `python handler.test`
+5. `python handler.test.py`
+
+Update requirements.txt:
+1. `pip freeze -l > requirements.txt`
 
 Deploy:
 1. Install & run docker

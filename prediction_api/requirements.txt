@@ -1,5 +1,6 @@
 boto3==1.26.115
 botocore==1.29.115
+imbalanced-learn==0.10.1
 jmespath==1.0.1
 joblib==1.2.0
 numpy==1.24.2
@@ -13,4 +14,3 @@ six==1.16.0
 threadpoolctl==3.1.0
 tzdata==2023.3
 urllib3==1.26.15
-imbalanced-learn==0.10.1

@@ -1,5 +1,3 @@
-import numpy as np
-
 try:
     import unzip_requirements
 except ImportError:
@@ -10,6 +8,7 @@ import pandas as pd
 import pickle
 import io
 from utils import *
+import numpy as np
 
 bucket_name = 'military-forecast'
 weather_folder = 'weather_v3'
@@ -21,7 +20,7 @@ prediction_key = "prediction"
 s3 = boto3.client('s3')
 
 
-def predict():
+def predict(event, ctx):
     current_datetime = datetime.now()
     print(f"Now is {current_datetime}")
 
@@ -55,17 +54,17 @@ def predict():
     prediction = {"last_prediction_time": str(current_datetime),
                   "regions_forecast": prediction}
     print("Created prediction")
+
     upload_predictions(prediction)
     print("Uploaded prediction")
-    response = {
+
+    return {
         "statusCode": 200,
         "headers": {
             "Content-Type": "application/json"
         },
         "body": json.dumps({"prediction": prediction})
     }
-
-    return response
 
 
 def get_weather(current_datetime_string):

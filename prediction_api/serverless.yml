@@ -31,11 +31,13 @@ package:
     - '**/*'
   include:
     - handler.py
+    - utils.py
+    - resources/holidays.json
 
 functions:
   predict:
     handler: handler.predict
-    timeout: 10
+    timeout: 25
     events:
       - schedule: rate(24 hours)
       - http:
