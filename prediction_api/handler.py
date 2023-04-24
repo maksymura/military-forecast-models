@@ -51,7 +51,7 @@ def predict(event, ctx):
                                **{number_to_hour_format(h): bool((model.predict(prediction_df)[0]) > 0.5)}}
         prediction = {**prediction, **{city: city_prediction}}
 
-    prediction = {"last_prediction_time": str(current_datetime),
+    prediction = {"last_prediction_time": datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
                   "regions_forecast": prediction}
     print("Created prediction")
 

@@ -20,7 +20,7 @@ def rebuild_model():
     model_bytes = pickle.dumps(model)
     s3_resource.Object(bucket_name, file).put(Body=model_bytes)
 
-    json_date = {'date': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
+    json_date = {'date': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')}
     data_file = s3_resource.Object(bucket_name, date_file)
     data_file.put(
         Body=(bytes(json.dumps(json_date, indent=4).encode('UTF-8')))
