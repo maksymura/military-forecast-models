@@ -119,7 +119,7 @@ def get_model():
 
 
 def upload_predictions(prediction):
-    json_string = json.dumps(prediction)
+    json_string = json.dumps(prediction, indent=4)
     json_bytes = json_string.encode('utf-8')
     file = io.BytesIO(json_bytes)
     file_name = f"{predictions_folder}/{prediction_key}.json"
